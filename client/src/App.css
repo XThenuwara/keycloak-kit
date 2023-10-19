@@ -1,0 +1,72 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap");
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Maven Pro" !important;
+}
+
+h1 span,
+h2 span,
+h3 span,
+h4 span,
+h5 span {
+  font-family: "Maven Pro" !important;
+
+}
+
+* {
+  box-sizing: border-box !important;
+  padding: 0;
+  margin: 0;
+  font-family: "Quicksand", sans-serif !important;
+}
+
+.rounded-up-left {
+    border-top-left-radius: 20px;
+}
+
+/* ===== Scrollbar CSS ===== */
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #e4eaec #ffffff;
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #ffffff;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #e4eaec;
+    border-radius: 10px;
+    border: 2px solid #ffffff;
+  }
+
+.dark  *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #2d2d2d;
+  border-radius: 10px;
+  border: 2px solid #1e1e1e;
+}
+
+
+.hover-parent .hover-child {
+  opacity: 0;
+  transition: 0.3s ease;
+}
+
+.hover-parent:hover .hover-child { 
+  opacity: 1;
+}
