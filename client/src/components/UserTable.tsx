@@ -18,19 +18,19 @@ type Groups = {
   status: boolean;
   message: string;
 };
-type Status ={
-    status: boolean;
-    message: string;
-    roles: Roles[];
-    groups: Groups[];
-}
+type Status = {
+  status: boolean;
+  message: string;
+  roles: Roles[];
+  groups: Groups[];
+};
 
 export type User = {
   username: string;
   password: string;
   roles: string;
   groups: string;
-  status:  Status;
+  status: Status;
 };
 
 export const UserTableColumns: ColumnDef<User>[] = [
@@ -61,27 +61,25 @@ export const UserTableColumns: ColumnDef<User>[] = [
       // then groups and roles
       return (
         <div className="space-y-1 flex items-center gap-1">
-            <div>
-          {status ? <span className="text-xs font-semibold px-2 text-dark p-1 rounded-full bg-teal-500 text-teal-950 ">{message}</span> : <span className="text-xs font-semibold bg-pink-100 text-pink-500 dark:text-pink-300 dark:bg-pink-500  px-2 text-dark p-1 rounded-full">{message}</span>}
-            </div>
+          <div>{status ? <span className="text-xs font-semibold px-2 text-dark p-1 rounded-full bg-teal-500 text-teal-950 ">{message}</span> : <span className="text-xs font-semibold text-pink-300 bg-pink-500  px-2 text-dark p-1 rounded-full">{message}</span>}</div>
           <div className="">
             {roles?.map((item, index) => {
-              return <Popover key={index}>
-                      <PopoverTrigger className={`text-xs font-semibold px-2 text-dark p-1 rounded-full ${item.status ? 'bg-teal-500': 'bg-pink-100 text-pink-500 dark:text-pink-300 dark:bg-pink-500 '}`}>{item.name}</PopoverTrigger>
-            <PopoverContent>
-                {item.message}
-            </PopoverContent>
-              </Popover>;
+              return (
+                <Popover key={index}>
+                  <PopoverTrigger className={`text-xs font-semibold px-2 text-dark p-1 rounded-full ${item.status ? "bg-teal-500" : "text-pink-200 bg-pink-500 "}`}>{item.name}</PopoverTrigger>
+                  <PopoverContent>{item.message}</PopoverContent>
+                </Popover>
+              );
             })}
           </div>
           <div className="">
-          {groups?.map((item, index) => {
-              return <Popover key={index}>
-                      <PopoverTrigger className={`text-xs font-semibold px-2 text-dark p-1 rounded-full ${item.status ? 'bg-teal-500': 'bg-pink-100 text-pink-500 dark:text-pink-300 dark:bg-pink-500 '}`}>{item.name}</PopoverTrigger>
-            <PopoverContent>
-                {item.message}
-            </PopoverContent>
-              </Popover>;
+            {groups?.map((item, index) => {
+              return (
+                <Popover key={index}>
+                  <PopoverTrigger className={`text-xs font-semibold px-2 text-dark p-1 rounded-full ${item.status ? "bg-teal-500" : "text-pink-200 bg-pink-500 "}`}>{item.name}</PopoverTrigger>
+                  <PopoverContent>{item.message}</PopoverContent>
+                </Popover>
+              );
             })}
           </div>
         </div>

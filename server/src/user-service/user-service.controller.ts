@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { UserServiceService } from './user-service.service';
 import { CreateUserServiceDto } from './dto/create-user.request.dto';
 import { UpdateUserServiceDto } from './dto/update-user-service.dto';
 import { SearchUserRequestDTO } from './dto/search.request.dto';
 import { ApplicationExceptionHandler } from '../lib/handlers/ApplicationExceptionHandler';
 import { GlobalResponseObject } from '../lib/handlers/GlobalResponse';
+import { Request } from 'express';
 
 @Controller('user-service')
 export class UserServiceController {

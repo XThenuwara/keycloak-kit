@@ -1,0 +1,19 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "devDependencies": {
+    "lerna": "^6.5.1"
+  },
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "clean": "lerna clean",
+    "publish": "lerna publish",
+    "dev": "lerna run dev --stream",
+    "build": "lerna run build",
+    "start": "lerna run start --stream"
+  }
+}

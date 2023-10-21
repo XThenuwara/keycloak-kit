@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UserContext } from "../lib/provider/UserContextProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SocketContext } from "../lib/provider/Websocket";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -26,6 +27,7 @@ const formSchema = z.object({
 
 const AuthenticationDrawer = () => {
   const { user, setUser } = useContext(UserContext);
+  const { socket, identify } = useContext(SocketContext);
   const { toast } = useToast();
   const [errorList, setErrorList] = React.useState<IErrorObj[]>([]);
   const [isAuth, setIsAuth] = React.useState(false);
@@ -56,15 +58,10 @@ const AuthenticationDrawer = () => {
     try {
       const res = await getAuth(username, password);
       if (!res.status) throw new Error(res.msg);
-
-      sessionStorage.setItem("token", JSON.stringify(res.data));
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      });
-      setErrorList([]);
-      form.reset();
-      setIsAuth(true);
+      
+      if (res) {
+        handleSaveAuth(res.data);
+      }
     } catch (e) {
       handleErrors(e, toast, setErrorList);
     }
@@ -78,11 +75,9 @@ const AuthenticationDrawer = () => {
         const res = await checkAuth(tokenData);
         if (!res.status) throw new Error(res.msg);
         if (res) {
-          setIsAuth(true);
-          sessionStorage.setItem("token", JSON.stringify(res.data));
+          handleSaveAuth(res.data);
         }
       }
-      await getWhoami();
     } catch (e) {
       handleErrors(e, toast, setErrorList);
     }
@@ -97,20 +92,38 @@ const AuthenticationDrawer = () => {
         if (!res.status) throw new Error(res.msg);
         if (res) {
           setIsAuth(true);
-          setUser({...res.data, realm: selectedRealm ?? res.data.realm });
+          setUser({...res.data, realm: selectedRealm ?? res.data.realm });  
           // get realms from res.data.realm_access
           const realms = Object.keys(res.data.realm_access);
           setRealms(realms);
+          return res.data;
         }
       }
+      return null;
     } catch (e) {
       handleErrors(e, toast, setErrorList);
     }
   };
 
+  const handleSaveAuth = async (tokenData: any) => {
+    try{
+      sessionStorage.setItem("token", JSON.stringify(tokenData));
+      const user = await getWhoami();
+      if(!user) throw new Error("No user found");
+
+      const newAuth = {...tokenData, ...user};
+      
+      sessionStorage.setItem("token", JSON.stringify(newAuth));
+      setErrorList([]);
+      setIsAuth(true);
+      identify();
+    }catch(e){
+      handleErrors(e, toast, setErrorList);
+    }
+  }
+
 
   const handleRealmChange = (value: string) =>{
-    console.log(value);
     setSelectedRealm(value);
     // update user context
     const updatedUser: any = {...user, realm: value};

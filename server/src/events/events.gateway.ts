@@ -9,6 +9,14 @@ import {
   import { map } from 'rxjs/operators';
   import { Server, Socket } from 'socket.io';
   
+interface ClientInfo {
+    userId: string;
+    displayName: string;
+    client: Socket;
+}
+
+const clients = new Map<string, ClientInfo>();
+  
   @WebSocketGateway({
     cors: {
       origin: '*',
@@ -18,21 +26,13 @@ import {
     @WebSocketServer()
     server: Server;
 
-
-    handleConnection(client: Socket, ...args: any[]) {
-        console.log('handleConnection');
+    @SubscribeMessage('identify')
+    identifyAndMapClient(client: Socket, data: ClientInfo) {
+        clients.set(`'${data.userId}'`, {userId: data.userId, displayName: data.displayName, client: client});
     }
 
-
-    @SubscribeMessage('events')
-    handleEvent(client: Socket, data: string): string {
-        console.log(data);
-        return data;
-    }
-
-    @SubscribeMessage('message')
-    handleMessage(client: Socket, data: string): string {
-        console.log(data);
-        return data;
+    getClientbyId(userId: string): ClientInfo {
+        const client = clients.get(`'${userId}'`);
+        return client;
     }
   }

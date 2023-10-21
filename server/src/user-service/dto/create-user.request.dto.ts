@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString , IsOptional, IsEmail } from 'class-validator';
+import { TokenDTO } from '../../lib/common.dto';
 
 class User {
     @IsNotEmpty()
@@ -32,5 +33,5 @@ class User {
 export class CreateUserServiceDto {
     users: User[];
     realm: string;
-    auth: any;
+    auth: TokenDTO;
 }

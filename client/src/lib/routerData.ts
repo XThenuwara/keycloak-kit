@@ -31,6 +31,5 @@ export const bottomLinks = [
       element: CreateUsersPage,
       children: null,
     },
-    { label: "Logout", icon: LogoutIcon, path: "#", children: null, element: CreateUsersPage },
   ];
   

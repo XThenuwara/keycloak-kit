@@ -5,9 +5,10 @@ import { ApplicationExceptionHandler } from '../lib/handlers/ApplicationExceptio
 import { ConfigModule } from '@nestjs/config';
 import { AuthServiceModule } from '../auth-service/auth-service.module';
 import { AuthServiceService } from '../auth-service/auth-service.service';
+import { EventsModule } from '../events/events.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, EventsModule],
   controllers: [UserServiceController],
   providers: [AuthServiceService,UserServiceService,ApplicationExceptionHandler ]
 })

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { CheckIcon, DocumentAddIcon, DocumentDownloadIcon, TrashIcon, UsersIcon, XIcon } from "@heroicons/react/outline";
@@ -12,17 +12,38 @@ import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { UserContext } from "../lib/provider/UserContextProvider";
 import { activateUsers, createUsers, deactivateUsers, deleteUsers } from "../api/api";
+import { SocketContext } from "../lib/provider/Websocket";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import TemplateModal from "../components/TemplateModal";
 
+interface IProgress {
+  message: string;
+  progress: number;
+}
+
+interface IProgressList {
+  list: IProgress[];
+  latest: number;
+}
+
+interface IIssues {
+  list: any[];
+  view: boolean;
+}
 
 const CreateUsersPage = () => {
   const { user } = useContext(UserContext);
+  const { socket } = useContext(SocketContext);
   const uploadDialogRef = React.useRef<HTMLButtonElement>(null);
   const actionPopOverRef = React.useRef<HTMLButtonElement>(null);
   const { toast } = useToast();
   const [fileData, setFileData] = useState<any[]>([]);
   const [errorList, setErrorList] = useState<IErrorObj[]>([]);
   const [action, setAction] = useState<string>("CREATE");
-  // const [progressList, setProgressList] = useState<any[]>([]);
+  const [progress, setProgress] = useState<IProgressList>({
+    list: [],
+    latest: 0,
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
     total: 0,
@@ -30,6 +51,19 @@ const CreateUsersPage = () => {
     failed: 0,
     view: false,
   });
+  const [issues, setIssues] = useState<IIssues>({
+    list: [],
+    view: false,
+  });
+
+  useEffect(() => {
+    socket?.on("progress", (data: IProgress) => {
+      setProgress({
+        list: [...progress.list, data],
+        latest: data.progress,
+      });
+    });
+  }, [socket]);
 
   const handleFileData = (file: any) => {
     try {
@@ -77,6 +111,7 @@ const CreateUsersPage = () => {
 
       const responseData = response.data;
       getStats(responseData);
+      let issueList: any[] = [];
       // update
       //get the username and update the status on fileData
       const updatedFileData = fileData.map((item: any) => {
@@ -89,9 +124,17 @@ const CreateUsersPage = () => {
             groups: user.groups && user.groups,
           };
         }
+
+        if (JSON.stringify(item).includes("error") || JSON.stringify(item).includes("Error") || JSON.stringify(item).includes(`"status":false`)) {
+          issueList.push(item);
+        }
         return item;
       });
 
+      setIssues({
+        ...issues,
+        list: issueList,
+      });
       setFileData(updatedFileData);
     } catch (e) {
       handleErrors(e, toast, setErrorList);
@@ -119,52 +162,50 @@ const CreateUsersPage = () => {
     });
   };
 
+  const handleShowIssues = () => {
+    setIssues({
+      ...issues,
+      view: true,
+    });
+  };
+
+  const handleTemplateFile = () => {
+    const columns = ["username", "password", "firstName", "lastName", "email", "roles", "groups"];
+    const rows: typeof columns = [];
+
+    const csvContent = "data:text/csv;charset=utf-8," + columns.join(",") + "\n" + rows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "userList.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click();
+
+    document.body.removeChild(link);
+  };
+
   return (
     <div>
-      {/* <nav aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
-          <li>
-            <a href="#" className="block transition hover:text-gray-700">
-              <span className="sr-only"> Home </span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-            </a>
-          </li>
-
-          <li className="rtl:rotate-180">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </li>
-
-          <li>
-            <a href="#" className="block transition hover:text-gray-700 font-bold">
-              {" "}
-              Create{" "}
-            </a>
-          </li>
-        </ol>
-      </nav> */}
       <div>
         <h2 className="text-2xl">Create</h2>
         <span className="text-sm font-semibold text-muted-foreground">Create the user list here</span>
       </div>
-      <div className="grid grid-flow-row-dense grid-cols-3 gap-3 mt-3">
+      <div className="grid grid-flow-row-dense grid-cols-3 gap-3 mt-3 items-stretch">
         <div className="md:col-span-2 col-span-3 space-y-2">
           {/* Upload Dialog */}
-          <Card className="md:col-span-2 col-span-3">
+          <Card className="md:col-span-2 col-span-3 hover-parent">
             <CardHeader>
               <div className="flex justify-between">
                 <h4 className="text-lg font-semibold">Import User List</h4>
                 <div className="flex gap-1">
-                  <Button className="rounded-full">
+                  <Button className="rounded-full hover-child" onClick={handleTemplateFile}>
                     <DocumentDownloadIcon className="h-5 w-5" />
                   </Button>
 
                   <Dialog>
                     <DialogTrigger ref={uploadDialogRef}>
-                      <Button variant="primary" className=" rounded-3xl">
+                      <Button variant="primary" role="group" className=" rounded-3xl">
                         <DocumentAddIcon className="h-5 w-5" />
                       </Button>
                     </DialogTrigger>
@@ -183,88 +224,62 @@ const CreateUsersPage = () => {
         </div>
 
         {/* Error list and Progress */}
-        <div className="col-span-3 md:col-span-1">
-          {errorList.length > 0 && (
-            <Card className="hover-parent">
-              <CardHeader>
-                <CardTitle>
-                  <div className="flex justify-between flex-row">
-                    <h4 className="text-lg font-semibold mb-0">Errors</h4>
-                    <Button onClick={() => setErrorList([])} className="p-1 px-2 hover-child">
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                {errorList.map((item, index) => {
-                  return (
-                    <Alert key={index} variant="destructive">
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>{item.msg}</AlertDescription>
-                    </Alert>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                Progress
-                {isLoading && (
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-teal-500"></div>
-                  </div>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-1 md:p-2">
-              {
-                stats.view && (
-                  <Card>
-                  <CardContent className="bg-background rounded-3 p-0 p-2 md:p-2 lg:p-3 rounded-md">
-                    <h3 className="text-md font-medium">{action}</h3>
-                    <div className="grid-cols-3 grid mt-2">
-                      <div className="text-gray-500 flex flex-col w-fit ">
-                        <h1 className="bg-gray-300 text-gray-600 px-2 font-semibold rounded-md">Total</h1>
-                        <div className="font-bold flex gap-1 mt-1 items-center">
-                          <UsersIcon className="h-4 w-4" />
-                          <span>{stats.total}</span>
-                        </div>
-                      </div>
-                      <div className="text-teal-500 flex flex-col w-fit ">
-                        <h1 className="bg-teal-500 text-teal-100 px-2 font-semibold rounded-md">Success</h1>
-                        <div className="font-bold flex gap-1 mt-1 items-center">
-                          <CheckIcon className="h-4 w-4" />
-                          <span>{stats.failed}</span>
-                        </div>
-                      </div>
-                      <div className="text-pink-500 flex flex-col w-fit ">
-                        <h1 className="bg-pink-500 text-pink-100 px-2 font-semibold rounded-md">Failed</h1>
-                        <div className="font-bold flex gap-1 mt-1 items-center">
-                          <XIcon className="h-4 w-4" />
-                          <span>{stats.success}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                )
-              }
-           
-            </CardContent>
-          </Card>
+        <div className="col-span-3 md:col-span-1 h-full">
+          <ProgressComponent errorList={errorList} setErrorList={setErrorList} progress={progress} stats={stats} action={action} />
         </div>
       </div>
-      <div className="mt-3">
+      <div className="my-3 mb-10 pb-10 hover-parent">
         <Card>
           <CardHeader>
             <div className="flex justify-between align-center">
               <h3 className="text-lg font-semibold">Create</h3>
-              <div className="flex gap-1 items-center">
-                <Select onValueChange={(value: string) => setAction(value)} defaultValue={action}>
+              <div className="flex gap-1 items-center divide-x-2">
+                {stats.view && (
+                  <div className="flex gap-3 hover-child">
+                    <div className="flex flex-col w-fit  text-gray-900 dark:text-gray-200 p-1 px-2 rounded-sm ">
+                      <div className="font-bold flex gap-1 mt-1 items-center">
+                        <UsersIcon className="h-4 w-4" />
+                        <span>{stats.total}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col w-fit  text-teal-600  dark:text-teal-500 p-1 px-2 rounded-sm ">
+                      <div className="font-bold flex gap-1 mt-1 items-center">
+                        <CheckIcon className="h-4 w-4" />
+                        <span>{stats.failed}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col w-fit  text-pink-500 dark:text-pink-500  p-1 px-2 rounded-sm ">
+                      <div className="font-bold flex gap-1 mt-1 items-center">
+                        <XIcon className="h-4 w-4" />
+                        <span>{stats.success}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="inline-block mx-2 min-h-[1em] w-0.5 self-stretch bg-neutral-100 opacity-100 dark:opacity-50"></div>
+                {issues.list.length > 0 && (
+                  <TemplateModal
+                    trigger={
+                      <Button variant="destructive" className="bg-pink-100 text-pink-500 dark:text-pink-300 dark:bg-pink-500 p-1 px-2" onClick={handleShowIssues} disabled={isLoading}>
+                        <ExclamationTriangleIcon className="h-4 w-4" />
+                      </Button>
+                    }
+                    size="3xl"
+                    title="Issues"
+                    description="Issues with the user list file"
+                    action={<></>}>
+                    <div className="max-h-screen h-96 min-h-fit overflow-y-scroll">
+                      <DataTable data={issues.list} columns={UserTableColumns} />
+                    </div>
+                  </TemplateModal>
+                )}
+
+                <Select
+                  onValueChange={(value: string) => {
+                    setStats({ ...stats, view: false });
+                    setAction(value);
+                  }}
+                  defaultValue={action}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Action" />
                   </SelectTrigger>
@@ -275,6 +290,7 @@ const CreateUsersPage = () => {
                     <SelectItem value="DELETE">DELETE</SelectItem>
                   </SelectContent>
                 </Select>
+
                 <Popover>
                   <PopoverTrigger>
                     <Button variant="primary" ref={actionPopOverRef} disabled={isLoading}>
@@ -293,12 +309,52 @@ const CreateUsersPage = () => {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <DataTable data={fileData ? fileData : []} columns={UserTableColumns} />
-          </CardContent>
+          <DataTable data={fileData ? fileData : []} columns={UserTableColumns} />
         </Card>
       </div>
     </div>
+  );
+};
+
+const ProgressComponent = ({ errorList, setErrorList, progress, stats, action }: any) => {
+  return (
+    <>
+      {errorList.length > 0 && (
+        <Card className="hover-parent h-full">
+          <CardHeader>
+            <CardTitle>
+              <div className="flex justify-between flex-row">
+                <h4 className="text-lg font-semibold mb-0">Errors</h4>
+                <Button onClick={() => setErrorList([])} className="p-1 px-2 hover-child">
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {errorList.map((item: IErrorObj, index: number) => {
+              return (
+                <Alert key={index} variant="destructive">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{item.msg}</AlertDescription>
+                </Alert>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            Progress
+            <div>
+              <span className="bg-teal-500 text-teal-950 px-2 p-1 text-sm rounded-xl">{progress.latest}%</span>
+            </div>
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    </>
   );
 };
 

@@ -80,7 +80,6 @@ export const getErrorObj = (e: any): IErrorObj => {
     };
   }
 
-  console.log("Error - 7");
   return {
     error: e,
     msg: JSON.stringify(e),
@@ -104,7 +103,6 @@ export const readFile = (file: any) => {
 
 export const handleExcelCsvFile = async (type: any, data: any) => {
   try {
-    console.log(type, data);
     const excelData = data;
     if (type === "xls" || type === "xlsx") {
       const workbook = XLSX.read(data, { type: "binary" }); 
@@ -138,7 +136,6 @@ export const handleExcelCsvFile = async (type: any, data: any) => {
 
 
 export const handleErrors =  (e: any, toast: any, setErrorList?: any) =>{
-  console.log(e);
   const errorObj = getErrorObj(e);
   toast && toast({
     title: errorObj.msg,

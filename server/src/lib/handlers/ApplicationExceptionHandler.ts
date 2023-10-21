@@ -2,9 +2,7 @@ import { HttpException } from "@nestjs/common";
 import { GlobalResponseObject, ErrorResponse } from "./GlobalResponse";
 
 export const getErrorObject = (e: any) => {
-    console.log(e);
     if (e.response && e.response.data && e.response.data.error && e.response.data.error_description) {
-        console.log('error', e.response.data);
         return {
             error: e.response.data,
             message: e.response.data.error_description,
@@ -13,7 +11,6 @@ export const getErrorObject = (e: any) => {
     }
     
     if(e.response && e.response.data && e.response.data.error && typeof e.response.data.error == 'string') {
-        console.log('error', e.response.data);
         return {
             error: e.response.data,
             message: e.response.data.error,
@@ -22,7 +19,6 @@ export const getErrorObject = (e: any) => {
     }
     
     if (e.response && e.response.data && e.response.data.errorMessage) {
-        console.log('error', e.response.data);
         return {
         error: e.response,
         message: e.response.data.errorMessage,

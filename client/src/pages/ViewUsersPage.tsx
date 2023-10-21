@@ -7,7 +7,6 @@ import { UserViewTable, UserViewTableColumns } from "../components/UserViewTable
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { handleErrors } from "../lib/utils";
-import { WebSocketDemo } from "../components/Websocket";
 
 const ViewUsersPage = () => {
   const { user } = useContext(UserContext);
@@ -15,7 +14,7 @@ const ViewUsersPage = () => {
   const [pagination, setPagination] = useState<Pagination>({
     first: 0,
     max: 10,
-    search: null,
+    search: "",
   });
   const [data, setData] = useState([]);
 
@@ -43,6 +42,15 @@ const ViewUsersPage = () => {
     }
   };
 
+  const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const search = e.currentTarget.value;
+    if (e.key === "Enter") {
+      setPagination({ ...pagination, search });
+      await fetchUsers();
+    }
+    setPagination({ ...pagination, search });
+  }
+
   return (
     <div>
       <div>
@@ -53,11 +61,10 @@ const ViewUsersPage = () => {
         <Card className="mt-3">
           <div className="p-1 md:p-3 flex justify-between items-center">
             <h3>Search</h3>
-            <Input className="w-[180]" placeholder="Search"/>
+            <Input className="w-[180]" placeholder="Search" onKeyDown={(e)=> handleSearch(e)}/>
           </div>
         <UserViewTable data={data} columns={UserViewTableColumns} />
         </Card>
-        <WebSocketDemo />
       </div>
     </div>
   );

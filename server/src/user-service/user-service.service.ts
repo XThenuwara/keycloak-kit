@@ -9,12 +9,14 @@ import { getErrorObject } from '../lib/handlers/ApplicationExceptionHandler';
 import { handlePromise } from '../lib/utils';
 import * as https from 'https';
 import { SearchUserRequestDTO } from './dto/search.request.dto';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class UserServiceService {
   constructor(
     private configService: ConfigService,
     private authService: AuthServiceService,
+    private eventGateway: EventsGateway,
   ) {}
 
   async getUserByUsername(request: GetUserByUsernameDTO) {
@@ -83,6 +85,12 @@ export class UserServiceService {
 
   async create(createUserServiceDto: CreateUserServiceDto) {
     try {
+      const clientSocket = await this.eventGateway.getClientbyId(createUserServiceDto.auth.userId);
+      if(clientSocket){
+        const {client} = clientSocket;
+        client.emit('progress', {message: 'Creating Users', progress: 0});
+      }
+
       const httpsAgent = new https.Agent({ rejectUnauthorized: false });
       axios.defaults.httpsAgent = httpsAgent;
       const { users, realm, auth } = createUserServiceDto;
@@ -110,6 +118,12 @@ export class UserServiceService {
 
 
       for (const [index, user] of usersModified.entries()) {
+
+        if(clientSocket){
+          const {client} = clientSocket;
+          client.emit('progress', {message: `Creating Users ${index + 1}/${usersModified.length}: ${user.username}`, progress: Math.floor((index + 1)/usersModified.length * 100) });
+        }
+
         // initailize response object
         const userResponse = {
           username: user.username,
@@ -159,6 +173,12 @@ export class UserServiceService {
             if (createUserErrorObj.status !== 409) {
               response.push(userResponse);
               continue;
+            }else{
+              // unique email
+              if(createUserErrorObj.message.includes('User exists with same email')){
+                response.push(userResponse);
+                continue;
+              }
             }
           }
 
@@ -190,7 +210,7 @@ export class UserServiceService {
             else {
               userResponse.roles.find((r) => r.name === role).status = false;
               userResponse.roles.find((r) => r.name === role).message =
-                'role_not_found';
+                'role not found';
             }
           }
 
@@ -203,7 +223,7 @@ export class UserServiceService {
             else {
               userResponse.groups.find((g) => g.name === group).status = false;
               userResponse.groups.find((g) => g.name === group).message =
-                'group_not_found';
+                'group not found';
             }
           }
 
@@ -272,6 +292,8 @@ export class UserServiceService {
   async updateState(request: CreateUserServiceDto, activate: boolean) {
     try {
       let { users, auth, realm } = request;
+      const clientSocket = await this.eventGateway.getClientbyId(request.auth.userId);
+   
       const KC_HOST = this.configService.get<string>('KC_HOST');
       const KC_CLIENT = this.configService.get<string>('KC_CLIENT');
 
@@ -289,7 +311,12 @@ export class UserServiceService {
       const response = [];
 
 
-      for (const user of usersModified) {
+      for (const [index, user] of usersModified.entries()) {
+        if(clientSocket){
+          const {client} = clientSocket;
+          client.emit('progress', {message: `Updating Users ${index + 1}/${usersModified.length}: ${user.username}`, progress: Math.floor((index + 1)/usersModified.length * 100) });
+        }
+
         authObj = await this.authService.checkAuth(auth);
         let headers = { Authorization: `Bearer ${authObj.access_token}` };
 
@@ -346,6 +373,8 @@ export class UserServiceService {
 
   async delete(request: CreateUserServiceDto) {
     try {
+      const clientSocket = await this.eventGateway.getClientbyId(request.auth.userId);
+
       let { users, auth, realm } = request;
       const KC_HOST = this.configService.get<string>('KC_HOST');
       const KC_CLIENT = this.configService.get<string>('KC_CLIENT');
@@ -364,7 +393,13 @@ export class UserServiceService {
       // auth
       let authObj = await this.authService.checkAuth(auth);
 
-      for (const user of usersModified) {
+      for (const [index, user] of usersModified.entries()) {
+
+        if(clientSocket){
+          const {client} = clientSocket;
+          client.emit('progress', {message: `Deleting Users ${index + 1}/${usersModified.length}: ${user.username}`, progress: Math.floor((index + 1)/usersModified.length * 100) });
+        }
+
         const userResponse = {
           username: user.username,
           status: null,
