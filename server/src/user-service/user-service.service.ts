@@ -149,6 +149,13 @@ export class UserServiceService {
           delete userCopy.groups;
           delete userCopy.status;
 
+          const validFields = ['username', 'email', 'firstName', 'lastName'];
+          //check if user has valid fields if not delete the field
+          for (const field in userCopy) {
+            if (!validFields.includes(field)) delete userCopy[field];
+          }
+
+
           authObj = await this.authService.checkAuth(auth);
           let headers = { Authorization: `Bearer ${authObj.access_token}` };
 
@@ -162,7 +169,6 @@ export class UserServiceService {
             ),
           );
 
-
           // to check if user already exist, if then assign roles and groups
           if (createUserError) {
             const createUserErrorObj = getErrorObject(createUserError);
@@ -175,10 +181,10 @@ export class UserServiceService {
               continue;
             }else{
               // unique email
-              if(createUserErrorObj.message.includes('User exists with same email')){
-                response.push(userResponse);
-                continue;
-              }
+              // if(createUserErrorObj.message.includes('User exists with same email')){
+              //   response.push(userResponse);
+              //   continue;
+              // }
             }
           }
 
@@ -227,6 +233,7 @@ export class UserServiceService {
             }
           }
 
+          axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
           //assign roles
           for (const role of rolesToAssign) {
             const [assignRoleError, assignRoleData] = await handlePromise(
@@ -247,6 +254,7 @@ export class UserServiceService {
                 true;
           }
 
+          axios.defaults.headers.post['Content-Type'] = 'application/json';
           //assign groups
           for (const group of groupsToAssign) {
             const [assignGroupError, assignGroupData] = await handlePromise(
