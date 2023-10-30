@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
-import { Sheet, SheetContent,  SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { LockClosedIcon, ShieldCheckIcon, TerminalIcon, UserIcon } from "@heroicons/react/outline";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl,  FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription,  CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { checkAuth, getAuth, getRealmsForUser } from "../api/api";
 import { IErrorObj, handleErrors } from "../lib/utils";
 import { useToast } from "@/components/ui/use-toast";
@@ -58,7 +58,7 @@ const AuthenticationDrawer = () => {
     try {
       const res = await getAuth(username, password);
       if (!res.status) throw new Error(res.msg);
-      
+
       if (res) {
         handleSaveAuth(res.data);
       }
@@ -92,7 +92,7 @@ const AuthenticationDrawer = () => {
         if (!res.status) throw new Error(res.msg);
         if (res) {
           setIsAuth(true);
-          setUser({...res.data, realm: selectedRealm ?? res.data.realm });  
+          setUser({ ...res.data, realm: selectedRealm ?? res.data.realm });
           // get realms from res.data.realm_access
           const realms = Object.keys(res.data.realm_access);
           setRealms(realms);
@@ -106,35 +106,33 @@ const AuthenticationDrawer = () => {
   };
 
   const handleSaveAuth = async (tokenData: any) => {
-    try{
+    try {
       sessionStorage.setItem("token", JSON.stringify(tokenData));
       const user = await getWhoami();
-      if(!user) throw new Error("No user found");
+      if (!user) throw new Error("No user found");
 
-      const newAuth = {...tokenData, ...user};
-      
+      const newAuth = { ...tokenData, ...user };
+
       sessionStorage.setItem("token", JSON.stringify(newAuth));
       setErrorList([]);
       setIsAuth(true);
       identify();
-    }catch(e){
+    } catch (e) {
       handleErrors(e, toast, setErrorList);
     }
-  }
+  };
 
-
-  const handleRealmChange = (value: string) =>{
+  const handleRealmChange = (value: string) => {
     setSelectedRealm(value);
     // update user context
-    const updatedUser: any = {...user, realm: value};
+    const updatedUser: any = { ...user, realm: value };
     setUser(updatedUser);
-  }
+  };
 
   return (
     <Sheet>
       <SheetTrigger>
-        <div
-          className="inline-flex hidden -z-10 relative cursor-pointer items-center justify-center rounded-xl border-none border-transparent bg-transparent p-2.5 font-semibold text-text hover:bg-heading/5 hover:text-heading focus:bg-heading/5 focus:outline-none focus:ring-2 focus:ring-heading/80 focus:ring-offset-0 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text sm:flex">
+        <div className="inline-flex -z-10 relative cursor-pointer items-center justify-center rounded-xl border-none border-transparent bg-transparent p-2.5 font-semibold text-text hover:bg-heading/5 hover:text-heading focus:bg-heading/5 focus:outline-none focus:ring-2 focus:ring-heading/80 focus:ring-offset-0 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text sm:flex">
           <UserIcon className="h-6 w-6" />
           {isAuth ? (
             <span className="text-xs absolute top-0 -right-2 bg-teal-400 px-2 p-1 rounded-xl">
@@ -171,8 +169,8 @@ const AuthenticationDrawer = () => {
                       <Button variant="primary">log out</Button>
                     </div>
                     <div className="mt-2">
-                        <h3 className="text-md font-medium">Select A Realm</h3>
-                      <Select onValueChange={(value:any)=> handleRealmChange(value)}>
+                      <h3 className="text-md font-medium">Select A Realm</h3>
+                      <Select onValueChange={(value: any) => handleRealmChange(value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Realm" />
                         </SelectTrigger>

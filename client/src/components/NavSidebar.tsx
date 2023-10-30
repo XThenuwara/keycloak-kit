@@ -1,17 +1,11 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { MenuAlt1Icon } from "@heroicons/react/outline"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { MenuAlt1Icon } from "@heroicons/react/outline";
+import { bottomLinks, links } from "../lib/routerData";
+import ReactIcon from "../assets/keycloak.png";
+import { Link } from "react-router-dom";
 
 export function NavSideBar() {
   return (
@@ -21,31 +15,48 @@ export function NavSideBar() {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
-          <SheetDescription>
-            Make changes to your profile here. Click save when you're done.
-          </SheetDescription>
+          <SheetTitle></SheetTitle>
+          <SheetDescription></SheetDescription>
         </SheetHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          {/* Logo */}
+          <div className="mt-5 h-8 flex-shrink-0 px-4 text-heading flex gap-2">
+            <img src={ReactIcon} alt="" className="h-8 w-8" />
+            <h3 className="text-xl font-medium">KeyCloak-Kit</h3>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input id="username" value="@peduarte" className="col-span-3" />
+          <div className="mt-5 space-y-1 px-1 sm:px-2">
+            {links.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  className={"text-text hover:bg-layer-3 hover:text-heading group relative flex items-center rounded-xl px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-heading/80"}>
+                  <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button type="submit">Save changes</Button>
-          </SheetClose>
-        </SheetFooter>
+        <div className="mb-2 space-y-1 px-1 sm:px-2">
+          {bottomLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.label}
+                to={link.path}
+                className={
+                  "bg-layer-3 text-heading text-text hover:bg-layer-3 hover:text-heading group relative flex items-center rounded-xl px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-heading/80"
+                }>
+                <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+        <SheetFooter></SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

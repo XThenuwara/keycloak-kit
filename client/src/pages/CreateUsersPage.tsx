@@ -231,7 +231,7 @@ const CreateUsersPage = () => {
       <div className="my-3 mb-10 pb-10 hover-parent">
         <Card>
           <CardHeader>
-            <div className="flex justify-between align-center">
+            <div className="flex justify-between align-center flex-wrap gap-1">
               <h3 className="text-lg font-semibold">Create</h3>
               <div className="flex gap-1 items-center divide-x-2">
                 {stats.view && (
