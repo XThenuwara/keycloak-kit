@@ -1,21 +1,23 @@
 import { ArrowNarrowUpIcon, CloudUploadIcon, CursorClickIcon, FolderAddIcon } from "@heroicons/react/outline";
 import { Button } from "../components/ui/button";
-import KeycloakImg from '../assets/Keycloak-logo.png';
+import KeycloakImg from "../assets/Keycloak-logo.png";
 
 const HomePage = () => {
   return (
-    <div>
-      <div className="card-track">
-        <div className="card-wrapper">
-          <div className="card">
-            <div className="card-image">
+    <div className="">
+      <div className="card-track ">
+        <div className="card-wrapper ">
+          <div className="card ">
+            <div className="card-image bg-opacity-80 bg-white dark:bg-black dark:bg-opacity-70">
               <section>
-                <div className="max-w-screen-xxl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16 bg-opacity-80 bg-white dark:bg-opacity-0">
+                <div className="max-w-screen-xxl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
                   <div className="grid grid-cols-1 gap-y-8 lg:grid-cols-2 lg:items-center lg:gap-x-16">
                     <div>
                       <img src={KeycloakImg} alt="" className="h-28 aspect-auto" />
                       <h1 className="text-5xl">Get Started</h1>
-                      <h5 className="text-muted-foreground mt-3 font-medium text-lg">In just three simple steps, seamlessly import your user list into Keycloak, streamlining your authentication and access management process effortlessly.</h5>
+                      <h5 className="text-muted-foreground mt-3 font-medium text-lg">
+                        In just three simple steps, seamlessly import your user list into Keycloak, streamlining your authentication and access management process effortlessly.
+                      </h5>
                       <div className="mt-6 flex gap-2">
                         <Button>Documentation</Button>
                         <Button variant="outline">Create</Button>

@@ -6,30 +6,29 @@ import ViewUsersPage from "../pages/ViewUsersPage";
 import { DashboardIcon } from "@radix-ui/react-icons";
 
 export const links = [
-    { label: "Home", icon: HomeIcon, path: "/home", children: null, element: HomePage },
-    {
-      label: "Create",
-      icon: PlusCircleIcon,
-      path: "/create",
-      element: CreateUsersPage,
-      children: null,
-    },
-    {
-      label: "View",
-      icon: UsersIcon,
-      path: "/view",
-      element: ViewUsersPage,
-      children: null,
-    },
-  ];
-  
+  { label: "Home", icon: HomeIcon, path: "", children: null, element: HomePage },
+  {
+    label: "Create",
+    icon: PlusCircleIcon,
+    path: "/create",
+    element: CreateUsersPage,
+    children: null,
+  },
+  {
+    label: "View",
+    icon: UsersIcon,
+    path: "/view",
+    element: ViewUsersPage,
+    children: null,
+  },
+];
+
 export const bottomLinks = [
-    {
-      label: "Settings",
-      icon: CogIcon,
-      path: "#",
-      element: CreateUsersPage,
-      children: null,
-    },
-  ];
-  
+  {
+    label: "Settings",
+    icon: CogIcon,
+    path: "#",
+    element: CreateUsersPage,
+    children: null,
+  },
+];
